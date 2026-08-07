@@ -1,4 +1,4 @@
-# MobileLab
+# MobileLab (Formerly IOSLab)
 
 > **Cross-platform mobile testing and device orchestration for modern development workflows.**
 
