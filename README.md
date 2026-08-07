@@ -1,104 +1,120 @@
-# iOSLab
+# MobileLab
 
-iOSLab is a local testing platform for iOS applications that runs test suites across many iOS Simulator instances in parallel on a single Mac. It removes the bottleneck of sequential simulator testing by distributing execution across device and OS version combinations simultaneously.
+> **Cross-platform mobile testing and device orchestration for modern development workflows.**
 
-## Table of Contents
+**MobileLab** is an open-source platform for orchestrating large-scale mobile application testing across multiple devices, operating-system versions, and execution environments.
 
-- [Why iOSLab](#why-ioslab)
-- [Features](#features)
-- [Requirements](#requirements)
-- [Installation](#installation)
-- [Quick Start](#quick-start)
-- [Usage](#usage)
-- [API](#api)
-- [Comparison](#comparison)
-- [Roadmap](#roadmap)
-- [Contributing](#contributing)
-- [License](#license)
+The project began as **iOSLab**, a macOS-focused platform designed to run large numbers of iOS Simulator instances in parallel. It is now evolving into a broader cross-platform mobile testing platform, with **Android support currently under development and testing**.
 
-## Why iOSLab
+> **Project status:** iOS support is the current primary platform. Android support is under active development and internal testing and is **not yet publicly released**.
 
-Standard iOS testing workflows run one simulator at a time. This makes cross-device and cross-version validation slow, and issues that only appear on specific device/OS combinations often surface in production instead of in CI.
+---
 
-iOSLab runs many simulator instances concurrently on the same machine, so a full device/OS matrix can be validated in a single pass instead of one run per configuration.
+## Formerly iOSLab
 
-## Features
+MobileLab was originally created under the name **iOSLab**.
 
-- **Parallel execution** — run tests across 20+ simulator instances concurrently.
-- **Hybrid device platform** — run Simulator instances and real virtualized iOS instances (Apple Virtualization.framework) side-by-side.
-- **Device/OS matrix testing** — validate a combination of device models (iPhone SE through Pro Max) and iOS versions (15–18) in one run.
-- **Visual virtualization engine** — full boot pipeline (`fw_prepare` -> `fw_patch` -> `restore` -> `cfw_install` -> `boot`) to run genuine real iOS 18 on guest VMs.
-- **Visual regression detection** — capture a screenshot per state and diff it against a baseline (fully supports VM screenshots).
-- **Cross-version diffing** — surface layout, animation, and OS-specific differences between iOS versions.
-- **Test orchestration** — describe the desired device/OS coverage declaratively; iOSLab handles scheduling, retries, and load balancing.
-- **Model Context Protocol (MCP)** — expose the device pool as standard tools to LLM agents (e.g. Claude Code/Desktop).
-- **AI-assisted exploratory tests** — automatically generate test flows and spec suites directly from live VM screenshots.
-- **Local CI pipeline** — run build, test, validate, and report steps locally without an external CI queue.
-- **Dashboard** — a live view of the device grid, logs, system load, and test status.
-- **REST API** — trigger and monitor runs programmatically for integration with CI/CD or internal tooling.
-- **Resource-aware scheduling** — adapts simulator and heavy VM concurrency to available CPU and memory using cost-weight resource intelligence.
+The original project focused on solving a specific problem: running large iOS Simulator test matrices concurrently on a single Mac instead of executing each device/OS configuration sequentially.
 
-## Requirements
+As the architecture evolved, the project expanded beyond iOS-specific orchestration toward a more general mobile testing platform capable of supporting multiple mobile operating systems and execution backends.
 
-- macOS
-- Xcode
-- 16 GB RAM minimum (32 GB+ recommended for high device counts)
+The repository, existing source code, historical commits, release artifacts, and some internal interfaces may therefore still contain references to:
 
-## Installation
+* `iOSLab`
+* `ioslab`
+* iOS-specific module names
+* legacy CLI commands
+* earlier architecture terminology
 
-### Option 1: Prebuilt release (recommended)
+These references are retained during the transition and do **not** represent the long-term project naming.
 
-Precompiled application bundles and CLI tools are available on the [Releases page](https://github.com/ducminh11102012/ioslab/releases). Download the latest release and run it directly — no build step required.
+**MobileLab is the current project name.**
 
-### Option 2: Build from source
+---
 
-Build from source if you plan to contribute or need to modify the system.
+## Why MobileLab?
 
-```bash
-git clone https://github.com/yourname/ioslab
-cd ioslab
-make setup
+Mobile applications increasingly need to be validated across a large matrix of:
+
+* device models
+* operating-system versions
+* screen sizes
+* architectures
+* runtime configurations
+* hardware capabilities
+* application states
+
+Running every configuration sequentially quickly becomes impractical.
+
+MobileLab is designed around **parallel execution and centralized orchestration**, allowing multiple mobile environments to be created, scheduled, tested, observed, and managed as a unified device pool.
+
+Instead of thinking about testing as:
+
+```text
+Build
+  ↓
+Device A
+  ↓
+Device B
+  ↓
+Device C
+  ↓
+Device D
 ```
 
-To build without a connected simulator environment (e.g., in CI):
+MobileLab is designed around:
 
-```bash
-IOSLAB_SIMULATOR_MOCK=true ./scripts/build_release.sh
+```text
+                    ┌── Device A
+                    ├── Device B
+Test Matrix ────────┼── Device C
+                    ├── Device D
+                    ├── Device E
+                    └── ...
 ```
 
-You can also point the build script at a specific repository and target directory:
+This makes large device/OS matrices significantly easier to automate and integrate into local development and CI workflows.
 
-```bash
-./scripts/build_release.sh <repo_url> <target_dir>
-```
+---
 
-## Quick Start
+# Current Platform Status
 
-Run a test across 12 simulators:
+| Platform                         | Status                         | Execution                                             |
+| -------------------------------- | ------------------------------ | ----------------------------------------------------- |
+| **iOS**                          | 🟢 Active                      | iOS Simulator / experimental virtualized environments |
+| **Android**                      | 🟡 Under Development & Testing | Android emulator / ARM-focused development            |
+| **Cross-platform orchestration** | 🟡 In Development              | Unified device and job model                          |
+| **Distributed execution**        | 🔵 Planned                     | Multi-machine / multi-node execution                  |
 
-```bash
-ioslab test --devices=12
-```
+### Android support
 
-Run a full local CI pipeline:
+Android support is currently being developed as part of the project's expansion beyond its original iOS-only architecture.
 
-```bash
-ioslab run pipeline.yaml
-```
+The Android implementation is currently being used for **development, experimentation, and internal testing**.
 
-## Usage
+It is **not yet considered a public stable feature** and should not be treated as production-ready.
 
-### Parallel test run
+The long-term goal is to provide Android environments through the same orchestration concepts used by the iOS side of MobileLab, rather than maintaining two completely separate testing systems.
+
+---
+
+# Features
+
+## Parallel execution
+
+Run large numbers of simulator or emulator instances concurrently on a single host.
 
 ```bash
 ioslab test --devices=32
 ```
 
-Runs the test suite across 32 simulator instances concurrently.
+The legacy `ioslab` command remains available while the project transitions to the MobileLab naming.
 
-### Matrix configuration
+---
 
-Define target devices and iOS versions declaratively:
+## Device and OS matrix testing
+
+Define a testing matrix across multiple device models and operating-system versions.
 
 ```yaml
 test:
@@ -106,118 +122,468 @@ test:
   ios_versions: [16, 17, 18]
 ```
 
-iOSLab distributes the run across the specified matrix and handles retries and load balancing automatically.
+MobileLab handles scheduling, retries, and resource-aware distribution across the available environments.
 
-## API
+---
 
-iOSLab exposes a REST API for integration with CI/CD systems and internal tools:
+## Hybrid device platform
 
+The current architecture supports multiple types of mobile execution environments.
+
+For iOS, this includes:
+
+* iOS Simulator instances
+* experimental virtualized iOS environments
+* unified device management
+* VM-aware resource scheduling
+
+Android support is being developed around the same broader device-orchestration architecture.
+
+---
+
+## Resource-aware scheduling
+
+Different execution environments have different resource requirements.
+
+MobileLab therefore assigns resource weights to execution targets and uses host CPU and memory availability when determining concurrency.
+
+For example:
+
+```text
+Simulator    → cost weight 1
+VM           → cost weight 4
 ```
+
+This prevents the orchestrator from blindly starting more environments than the host can reasonably handle.
+
+---
+
+## Visual regression testing
+
+Capture screenshots from test states and compare them against known baselines.
+
+This allows automated detection of:
+
+* layout changes
+* rendering differences
+* OS-specific UI changes
+* unexpected visual regressions
+
+---
+
+## Cross-version testing
+
+Compare application behavior and visual output across different operating-system versions.
+
+This is particularly useful for identifying regressions that only appear on specific OS releases.
+
+---
+
+## Test orchestration
+
+Describe the desired testing environment declaratively.
+
+MobileLab manages:
+
+* device allocation
+* test scheduling
+* retries
+* load balancing
+* resource limits
+* result collection
+
+---
+
+## REST API
+
+MobileLab exposes APIs for integrating device orchestration into external tooling and CI/CD systems.
+
+Example endpoints include:
+
+```text
 POST /devices/spawn
 POST /tests/run
 GET  /metrics
 ```
 
-### v2 VM-Specific Endpoints
+Virtualized environments additionally expose VM-specific operations where supported:
+
+```text
+POST /vms/spawn
+GET  /vms
+GET  /vms/{id}/screenshot
+POST /vms/{id}/input
+POST /vms/{id}/backup
+POST /vms/{id}/restore
+POST /vms/{id}/switch
 ```
-POST /vms/spawn          # Spawn a real virtualized iOS guest VM
-GET  /vms                # List all virtualized guest VMs
-GET  /vms/{id}/screenshot # Get a live base64 snapshot of the guest VM screen
-POST /vms/{id}/input      # Inject tap, swipe, keypress, or scroll gesture
-POST /vms/{id}/backup     # Create a saved state backup of guest VM
-POST /vms/{id}/restore    # Restore VM state to a saved backup snapshot
-POST /vms/{id}/switch     # Hot-swap CPU, memory, or disk specifications
-POST /vms/{id}/agent/explore # Propose exploratory test flows using screenshots
-POST /mcp                 # JSON-RPC 2.0 endpoint for the Model Context Protocol
-```
-
-## VM Lifecycle CLI Subcommands
-
-iOSLab v2 introduces a first-class command group `vm` for complete guest VM lifecycle orchestrations, mirroring Simulator ergonomics:
-
-```bash
-# Create a new guest VM configuration on disk
-ioslab vm new "iPhone 18 VM" --cpu 4 --memory 6 --disk 64
-
-# Boot VM through firmware preparation, patching, and restore pipelines
-ioslab vm boot <vmId>
-
-# Snapshot/Backup VM state
-ioslab vm backup <vmId> "Clean-Install"
-
-# Restore VM to previously saved backup state
-ioslab vm restore <vmId> "Clean-Install"
-
-# Hot-swap CPU or Memory specifications of a running/stopped VM
-ioslab vm switch <vmId> --cpu 8 --memory 12
-
-# List all local virtualized iOS guest VMs on Apple Silicon
-ioslab vm list
-```
-
-To dynamically spawn a VM via the unified `spawn` command, use the `--vm` flag:
-```bash
-ioslab spawn "My Guest iOS 18" --vm
-```
-
-## Model Context Protocol (MCP) Server
-
-iOSLab v2 hosts a fully standard-compliant MCP server at `POST /mcp` (using JSON-RPC 2.0). LLM client agents (such as Claude Code or Claude Desktop) can connect and drive automated physical-like guest iOS VM testing directly:
-- `list_devices`: lists unified device pools (Simulators and VMs).
-- `spawn_device`: provisions and boots Simulator or VM.
-- `run_test`: enqueues test targets.
-- `get_screenshot`: grabs base64 live screen of virtualized real iOS.
-- `inject_input`: sends touch/keyboard inputs.
 
 ---
 
-## Migration & Compatibility Guide for v1 Users
+## Model Context Protocol
 
-iOSLab v2 is designed to be **strictly additive, 100% backward-compatible, and zero-configuration** for existing Simulator-only users.
+MobileLab includes an MCP interface that allows compatible AI development agents to interact with the device pool.
 
-### Backward-Compatible Defaults
-- **Existing Commands Unmodified:** Commands like `ioslab test --devices=32` continue to execute 32 lightweight iOS Simulator instances backed by `xcrun simctl`.
-- **Zero Configuration Needed:** If you do not explicitly opt-in to Virtualization, the platform behaves identically to v1, avoiding high CPU/disk footprints of running full iOS kernels.
+Supported operations include:
 
-### Explicit Opt-in for Real iOS VMs
-VM testing is strictly opt-in and can be described declaratively in matrix YAML configurations or target flags:
+```text
+list_devices
+spawn_device
+run_test
+get_screenshot
+inject_input
+```
+
+This makes it possible for development agents to interact with mobile testing environments programmatically rather than relying exclusively on manual workflows.
+
+---
+
+## AI-assisted exploratory testing
+
+The platform is designed to support AI-assisted exploration of mobile applications using live device state and screenshots.
+
+This area remains experimental and is subject to ongoing development.
+
+---
+
+## Local CI pipeline
+
+Run build, test, validation, and reporting workflows locally without requiring every operation to pass through an external CI queue.
+
+```bash
+ioslab run pipeline.yaml
+```
+
+---
+
+# iOS Virtualization
+
+One of the project's experimental areas is running genuine iOS environments through virtualization on supported Apple Silicon systems.
+
+The current architecture contains a VM lifecycle pipeline including:
+
+```text
+fw_prepare
+    ↓
+fw_patch
+    ↓
+restore
+    ↓
+cfw_install
+    ↓
+boot
+```
+
+Virtualized iOS environments are treated differently from lightweight Simulator instances because of their substantially higher resource requirements.
+
+VM functionality should currently be considered **experimental**.
+
+---
+
+# Android Development
+
+Android support represents the next major stage of MobileLab's development.
+
+The goal is to provide a unified architecture where Android environments can eventually participate in the same concepts as iOS environments:
+
+```text
+                    MobileLab
+                        │
+              ┌─────────┴─────────┐
+              │                   │
+             iOS               Android
+              │                   │
+       ┌──────┴──────┐      ┌─────┴─────┐
+       │             │      │           │
+   Simulator         VM   Emulator    ARM
+```
+
+Current Android work includes experimentation with:
+
+* Android emulator orchestration
+* ARM-based execution environments
+* device lifecycle management
+* unified device models
+* resource-aware scheduling
+* cross-platform testing infrastructure
+
+### Important
+
+Android functionality is currently:
+
+**Under Development & Testing**
+
+It has **not been publicly released as a stable MobileLab feature**.
+
+Interfaces and implementation details may change substantially before public availability.
+
+---
+
+# Requirements
+
+### Current iOS development
+
+* macOS
+* Xcode
+* Apple Silicon recommended
+* 16 GB RAM minimum
+* 32 GB+ recommended for high simulator counts
+
+### Android development
+
+Android support is still under development. Requirements may change as the Android execution backend matures.
+
+ARM-based environments are an active area of investigation and development.
+
+---
+
+# Installation
+
+## Prebuilt releases
+
+Precompiled application bundles and CLI tools are available through the project's release system.
+
+During the transition from iOSLab to MobileLab, some existing releases may still use the legacy `ioslab` naming.
+
+---
+
+## Build from source
+
+Clone the repository and build the project:
+
+```bash
+git clone <repository-url>
+cd <repository-directory>
+make setup
+```
+
+To build without a connected simulator environment:
+
+```bash
+IOSLAB_SIMULATOR_MOCK=true ./scripts/build_release.sh
+```
+
+The `IOSLAB_*` environment variables are currently retained for backward compatibility with the original iOSLab implementation.
+
+---
+
+# Usage
+
+## Run parallel iOS Simulator tests
+
+```bash
+ioslab test --devices=12
+```
+
+Run a larger matrix:
+
+```bash
+ioslab test --devices=32
+```
+
+The legacy CLI name is intentional during the project transition.
+
+Future releases may introduce the new `mobilelab` command namespace.
+
+---
+
+# Matrix Configuration
+
+A basic iOS matrix can be described as:
+
+```yaml
+test:
+  devices: 24
+  ios_versions: [16, 17, 18]
+```
+
+The longer-term cross-platform model is designed around a unified device definition:
+
 ```yaml
 test:
   devices:
-    - type: simulator
-      count: 24
-      ios_versions: [17, 18]
-    - type: vm
-      count: 4
-      ios_versions: [18]
-      variant: boot-only   # firmware minimal patch tier
+    - type: ios-simulator
+      count: 12
+      os_versions: [17, 18]
+
+    - type: android-emulator
+      count: 12
+      os_versions: [14, 15]
 ```
 
-### Resource Accounting and Cost Weights
-- Running full iOS virtual machines incurs high overhead. iOSLab v2 incorporates resource-aware scheduling:
-  - **Simulator cost weight:** `1` resource unit.
-  - **VM cost weight:** `4` resource units.
-- The orchestrator load-balancer automatically limits total active device weight based on host memory and CPU limits to prevent core throttling.
+> Android matrix configuration is currently **design/development work** and is not yet publicly available as a stable feature.
 
-## Comparison
+---
 
-| | Traditional workflow | iOSLab |
-|---|---|---|
-| Execution model | Sequential | Parallel |
-| Feedback loop | Slow | Fast |
-| Device/OS coverage | One configuration per run | Full matrix per run |
+# Virtual Machine Lifecycle
 
-## Roadmap
+For supported experimental iOS VM environments:
 
-- Multi-Mac clustering
-- Distributed execution across machines
-- Physical device integration
-- AI-generated test flows
+```bash
+ioslab vm new "iPhone VM" --cpu 4 --memory 6 --disk 64
 
-## Contributing
+ioslab vm boot <vmId>
 
-Contributions are welcome, particularly around performance, scheduling, and developer experience. Please open an issue to discuss significant changes before submitting a pull request.
+ioslab vm backup <vmId> "Clean-Install"
 
-## License
+ioslab vm restore <vmId> "Clean-Install"
 
-This project is licensed under the [MIT License](LICENSE). See the `LICENSE` file for details.
+ioslab vm switch <vmId> --cpu 8 --memory 12
+
+ioslab vm list
+```
+
+VM functionality is experimental and may change between releases.
+
+---
+
+# Architecture
+
+MobileLab is gradually moving toward a unified architecture consisting of:
+
+```text
+                    ┌───────────────────────┐
+                    │      MobileLab        │
+                    │  Orchestration Layer  │
+                    └───────────┬───────────┘
+                                │
+             ┌──────────────────┼──────────────────┐
+             │                  │                  │
+             ▼                  ▼                  ▼
+        Device Pool        Job Scheduler       REST / MCP
+             │                  │                  │
+       ┌─────┴─────┐            │            AI / CI / Tools
+       │           │            │
+      iOS       Android         │
+       │           │            │
+   Simulator   Emulator         │
+       │           │            │
+       └─────┬─────┘            │
+             │                  │
+             ▼                  ▼
+        Resource Manager ── Test Execution
+```
+
+The architecture is intentionally designed so that platform-specific execution backends can evolve independently while sharing orchestration, scheduling, APIs, and reporting infrastructure.
+
+---
+
+# Migration from iOSLab
+
+The transition from **iOSLab → MobileLab** is currently ongoing.
+
+Existing source code may contain legacy identifiers such as:
+
+```text
+iOSLab
+ioslab
+IOSLAB_*
+```
+
+These are not accidental.
+
+They represent compatibility with the project's previous architecture and tooling.
+
+The repository will gradually migrate these identifiers as the new cross-platform architecture stabilizes.
+
+### What is changing?
+
+```text
+Before
+
+iOSLab
+  └── iOS testing
+       └── Simulator / VM
+
+
+Now
+
+MobileLab
+  ├── iOS
+  │    ├── Simulator
+  │    └── experimental VM
+  │
+  └── Android
+       └── development / testing
+```
+
+The goal is **not** to discard the existing iOSLab implementation, but to evolve it into a broader mobile testing platform.
+
+---
+
+# Roadmap
+
+### Current
+
+* [x] Parallel iOS Simulator execution
+* [x] Device/OS matrix testing
+* [x] Resource-aware scheduling
+* [x] REST API
+* [x] MCP integration
+* [x] Local CI workflows
+* [x] Experimental iOS virtualization
+* [x] Visual regression infrastructure
+* [ ] Android execution backend
+* [ ] Android device orchestration
+* [ ] Unified iOS/Android matrix
+* [ ] ARM-focused Android testing
+
+### Future
+
+* [ ] Multi-Mac clustering
+* [ ] Distributed execution
+* [ ] Physical device integration
+* [ ] Cross-platform visual regression
+* [ ] Unified Android/iOS device pools
+* [ ] Remote execution nodes
+* [ ] Expanded ARM infrastructure
+* [ ] AI-generated mobile test flows
+
+---
+
+# Contributing
+
+Contributions are welcome.
+
+Areas where contributions are particularly useful include:
+
+* scheduling and resource management
+* simulator/emulator orchestration
+* Android support
+* ARM infrastructure
+* distributed execution
+* testing infrastructure
+* developer experience
+* documentation
+
+For major architectural changes, please open an issue before submitting a large pull request.
+
+---
+
+# Project Status
+
+MobileLab is an actively evolving open-source project.
+
+The iOS side is currently the most mature part of the platform, while Android and cross-platform execution are being developed and tested.
+
+Some functionality described in this README represents **experimental or in-development architecture** rather than a stable public API.
+
+Interfaces, commands, and implementation details may therefore change as the project transitions from its original iOSLab architecture to the broader MobileLab platform.
+
+---
+
+# License
+
+This project is licensed under the **MIT License**.
+
+See [`LICENSE.md`](LICENSE.md) for details.
+
+---
+
+## Formerly iOSLab
+
+**MobileLab was formerly known as iOSLab.**
+
+The original iOSLab project focused on parallel iOS Simulator testing on macOS. The project is now expanding toward a cross-platform mobile testing and device orchestration platform covering **iOS, Android, and ARM-based development environments**.
+
+Existing code and historical artifacts may continue to reference `iOSLab` during this transition.
