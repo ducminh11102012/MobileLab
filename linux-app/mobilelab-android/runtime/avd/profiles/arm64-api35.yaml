@@ -1,0 +1,15 @@
+name: mobilelab-arm64-api35
+platform: android
+api: 35
+abi: arm64-v8a
+image: google_apis
+preferred_device: pixel_9
+execution:
+  mode: native-arm64
+  allow_kvm: true
+  allow_userspace: true
+  reject_x86_translation: false
+artifacts:
+  screenshots: true
+  logcat: true
+  emulator_console: true
