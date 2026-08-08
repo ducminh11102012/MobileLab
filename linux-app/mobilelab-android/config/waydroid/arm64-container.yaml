@@ -1,0 +1,12 @@
+runtime: waydroid
+architecture: aarch64
+mode: container
+nested_virtualization: false
+android:
+  transport: adb
+  lifecycle: managed
+  artifacts: enabled
+scheduler:
+  resource_class: arm64-container
+  cpu_weight: 1
+  memory_weight: 1
