@@ -23,3 +23,6 @@ target_link_libraries(mobilelab-android PRIVATE Qt6::Widgets Qt6::Network)
 target_compile_definitions(mobilelab-android PRIVATE MOBILELAB_ANDROID_UI=1 MOBILELAB_ARM_RUNTIME=1 MOBILELAB_GOOGLE_ANDROID_EMULATOR=1 MOBILELAB_MATRIX_EXECUTION=1)
 target_include_directories(mobilelab-android PRIVATE src src/core)
 install(TARGETS mobilelab-android RUNTIME DESTINATION bin)
+
+enable_testing()
+add_test(NAME mobilelab-arm64-smoke COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/tests/arm64-smoke.sh)
