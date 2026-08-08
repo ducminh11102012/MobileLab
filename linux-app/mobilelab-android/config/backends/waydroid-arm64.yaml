@@ -6,8 +6,10 @@ backend:
   nested_virtualization: false
 
 runtime:
-  native_arm: preferred
-  kvm: optional
+  native_arm: required
+  kvm: not_required
+  binder: required
+  cgroups: required
   adb: required
   artifacts: enabled
 
@@ -17,3 +19,8 @@ limits:
 
 matrix:
   lifecycle: provision-start-test-collect-stop
+  isolation: container
+
+upstream:
+  project: waydroid/waydroid
+  revision: e7d73e7ff9d23003356d716e5a40fa5ca7ad17e0
