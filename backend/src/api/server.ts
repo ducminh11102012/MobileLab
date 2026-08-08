@@ -6,6 +6,7 @@ import { registerTestRoutes } from "./routes/tests";
 import { registerMetricsRoutes } from "./routes/metrics";
 import { registerVmRoutes } from "./routes/vms";
 import { registerMcpRoutes } from "./routes/mcp";
+import { registerCapabilityRoutes } from "./routes/capabilities";
 import { errorHandler } from "./middleware/errorHandler";
 import { registerLogSocket } from "../websocket/registerLogSocket";
 
@@ -28,6 +29,7 @@ export function buildServer(orchestrator: OrchestratorService) {
   void registerMetricsRoutes(app, orchestrator);
   void registerVmRoutes(app, orchestrator);
   void registerMcpRoutes(app, orchestrator);
+  void registerCapabilityRoutes(app);
   registerLogSocket(app);
 
   return app;
