@@ -1,0 +1,20 @@
+name: arm64-native-validation
+strategy: capability-aware
+platforms:
+  - android
+architectures:
+  - arm64-v8a
+constraints:
+  prefer_native: true
+  require_arm64: true
+  allow_nested_kvm: false
+  reject_x86_guest: false
+workloads:
+  - apk-install
+  - instrumentation
+  - native-jni
+  - abi-validation
+  - screenshot
+  - logcat
+artifacts:
+  directory: runtime/artifacts
