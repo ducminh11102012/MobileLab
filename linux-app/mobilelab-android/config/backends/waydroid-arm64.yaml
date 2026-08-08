@@ -1,0 +1,19 @@
+backend:
+  name: waydroid-arm64
+  type: container
+  provider: waydroid
+  architecture: aarch64
+  nested_virtualization: false
+
+runtime:
+  native_arm: preferred
+  kvm: optional
+  adb: required
+  artifacts: enabled
+
+limits:
+  memory_mib: 4096
+  cpu_shares: 1024
+
+matrix:
+  lifecycle: provision-start-test-collect-stop
