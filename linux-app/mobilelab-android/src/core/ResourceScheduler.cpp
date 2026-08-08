@@ -1,0 +1,7 @@
+#include "ResourceScheduler.h"
+ResourceScheduler::ResourceScheduler(QObject*p):QObject(p){connect(&m_timer,&QTimer::timeout,this,&ResourceScheduler::tick);m_timer.start(250);}
+void ResourceScheduler::configure(int cpu,int memoryMb){m_cpu=qMax(1,cpu);m_memory=qMax(512,memoryMb);emit jobChanged();}
+QString ResourceScheduler::enqueue(const QString&t,const QString&c,int cost){RunRequest r;r.id=QString("run-%1").arg(++m_seq);r.target=t;r.command=c;r.cost=qMax(1,cost);m_queue.enqueue(r);m_logs<<QString("queued %1 on %2 (cost=%3)").arg(r.id,t).arg(r.cost);emit logMessage(m_logs.last());emit jobChanged();return r.id;}
+void ResourceScheduler::cancel(const QString&id){for(auto it=m_running.begin();it!=m_running.end();++it)if(it.key()==id){m_used-=it.value().cost;m_running.erase(it);emit logMessage("cancelled "+id);emit jobChanged();return;}QQueue<RunRequest> q;while(!m_queue.isEmpty()){auto r=m_queue.dequeue();if(r.id!=id)q.enqueue(r);}m_queue=q;emit jobChanged();}
+void ResourceScheduler::tick(){if(m_queue.isEmpty())return;auto r=m_queue.head();if(m_used+r.cost>m_cpu*2)return;m_queue.dequeue();m_used+=r.cost;m_running.insert(r.id,r);emit logMessage(QString("started %1: %2").arg(r.id,r.command));QTimer::singleShot(1500,[this,r]{if(m_running.remove(r.id)){m_used-=r.cost;emit logMessage("completed "+r.id);emit jobChanged();}});emit jobChanged();}
+QJsonObject ResourceScheduler::status()const{return {{"cpu",m_cpu},{"memory_mb",m_memory},{"queued",m_queue.size()},{"running",m_running.size()},{"used_cost",m_used}};}
