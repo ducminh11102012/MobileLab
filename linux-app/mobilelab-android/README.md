@@ -22,6 +22,8 @@ This is a **Linux application/framework for Android testing**, not an Android AP
 - Device, matrix, runtime, scheduler and console views
 - Runtime capability probing (host arch, KVM, QEMU, Android emulator, installed ABIs)
 - Device start/stop/restart and shell surfaces
+- Device tagging, ABI/API/backend/state search, and health scoring
+- Scheduler priority queue metadata, retry policy metadata, and dry-run capacity estimates
 - VS Code launch action for coding apps side-by-side with the device lab
 - Backend status reporting suitable for CI and future MCP integration
 
@@ -59,6 +61,7 @@ Relevant configuration files:
 - `config/matrix/hybrid-x86_64-arm64.yaml`
 - `config/backends/hybrid-android.yaml`
 - `config/backends/waydroid-arm64.yaml`
+- `config/features-priority.yaml`
 
 ## REST API
 
@@ -70,8 +73,10 @@ GET  /devices
 POST /runs
 POST /devices/:id/start
 POST /devices/:id/stop
+GET  /scheduler/dry-run
 ```
 
+Device responses include `arch`, `backend`, `stability`, `tags`, and `health_score` so callers can distinguish x86_64-preferred targets from ARM64-fundamental targets and quickly filter weak or incompatible devices. The scheduler status and dry-run API expose priority-aware queue capacity before a run is submitted.
 Device responses include `arch`, `backend`, and `stability` so callers can distinguish x86_64-preferred targets from ARM64-fundamental targets.
 
 Example:

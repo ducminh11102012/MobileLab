@@ -13,6 +13,8 @@ struct AndroidTarget {
     QString state="stopped";
     QString backend="emulator";
     QString stability="experimental";
+    QStringList tags;
+    int healthScore=50;
     int pid=-1;
 };
 
@@ -45,6 +47,8 @@ private:
     int indexOf(const QString &id) const;
     QString findExecutable(const QStringList &names) const;
     QString classifyTargetStability(const QString &abi) const;
+    QStringList deriveTags(const AndroidTarget &target) const;
+    int calculateHealthScore(const AndroidTarget &target) const;
     QList<AndroidTarget> m_targets;
     AndroidEmulator *m_androidEmulator=nullptr;
     QString m_arch,m_kernel;
