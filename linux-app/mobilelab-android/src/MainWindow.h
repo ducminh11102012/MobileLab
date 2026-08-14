@@ -10,7 +10,7 @@
 class AndroidRuntime; class AndroidEmulator; class ResourceScheduler; class ApiServer; class MatrixExecutor; class ArtifactCollector;
 class MainWindow final:public QMainWindow{
  Q_OBJECT
-public:explicit MainWindow(QWidget*=nullptr);
+public:explicit MainWindow(QWidget *parent=nullptr);
 private:
  QWidget*makeSidebar(); QWidget*makeTopBar(); QWidget*makeDashboard(); QWidget*makeDevices(); QWidget*makeMatrix(); QWidget*makeConsole(); QWidget*makeInspector();
  void selectPage(int); void refreshUi(); void showAvdWizard(); void runMatrix();
