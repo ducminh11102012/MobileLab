@@ -15,5 +15,9 @@ else if(method=="POST"&&path.startsWith("/devices/")&&path.endsWith("/start")){o
 else if(method=="POST"&&path.startsWith("/devices/")&&path.endsWith("/stop")){out={{"ok",m_runtime->stop(path.section('/',2,2))}};}
 else if(method=="GET"&&path=="/scheduler/dry-run"){const auto target=m_runtime->targets().isEmpty()?QString("hybrid-dev"):m_runtime->targets().first().id;out={{"dry_run",m_scheduler->dryRun(target,"android-test",1,50)}};}
 else if(method=="POST"&&path=="/runs"){const auto target=m_runtime->targets().isEmpty()?QString("hybrid-dev"):m_runtime->targets().first().id;out={{"id",m_scheduler->submit(target,"android-test",1,50,1)}};}
+else if(method=="GET"&&path=="/devices"){QJsonArray a;for(const auto&t:m_runtime->targets())a.append(QJsonObject{{"id",t.id},{"api",t.api},{"arch",t.arch},{"state",t.state},{"backend",t.backend},{"stability",t.stability},{"pid",t.pid}});out={{"devices",a}};}
+else if(method=="POST"&&path.startsWith("/devices/")&&path.endsWith("/start")){out={{"ok",m_runtime->start(path.section('/',2,2))}};}
+else if(method=="POST"&&path.startsWith("/devices/")&&path.endsWith("/stop")){out={{"ok",m_runtime->stop(path.section('/',2,2))}};}
+else if(method=="POST"&&path=="/runs"){out={{"id",m_scheduler->enqueue(m_runtime->targets().isEmpty()?"hybrid-dev":m_runtime->targets().first().id,"android-test",1)}};}
 else{code=404;out={{"error","not found"}};}
 s->write(response(code,out));s->disconnectFromHost();emit logMessage(method+" "+path);}

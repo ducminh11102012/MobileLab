@@ -77,6 +77,7 @@ GET  /scheduler/dry-run
 ```
 
 Device responses include `arch`, `backend`, `stability`, `tags`, and `health_score` so callers can distinguish x86_64-preferred targets from ARM64-fundamental targets and quickly filter weak or incompatible devices. The scheduler status and dry-run API expose priority-aware queue capacity before a run is submitted.
+Device responses include `arch`, `backend`, and `stability` so callers can distinguish x86_64-preferred targets from ARM64-fundamental targets.
 
 Example:
 

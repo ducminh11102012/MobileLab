@@ -71,6 +71,7 @@ void AndroidRuntime::refreshTargets(){
         m_androidEmulator->discover();
         for(const auto &a:m_androidEmulator->avds()){
             AndroidTarget t;t.id=a.name;t.api=a.api;t.arch=a.abi;t.state=a.running?"running":"stopped";t.backend="google-emulator";t.stability=classifyTargetStability(a.abi);t.tags=deriveTags(t);t.healthScore=calculateHealthScore(t);m_targets.push_back(t);
+            AndroidTarget t;t.id=a.name;t.api=a.api;t.arch=a.abi;t.state=a.running?"running":"stopped";t.backend="google-emulator";t.stability=classifyTargetStability(a.abi);m_targets.push_back(t);
         }
     }
     if(m_targets.isEmpty()){
@@ -80,6 +81,11 @@ void AndroidRuntime::refreshTargets(){
     if(m_targets.isEmpty()){
         AndroidTarget x86;x86.id="x86_64-dev";x86.api="native-dev";x86.arch="x86_64";x86.state="ready";x86.backend="host-dev";x86.stability="preferred";x86.tags=deriveTags(x86);x86.healthScore=calculateHealthScore(x86);m_targets.push_back(x86);
         AndroidTarget arm;arm.id="arm64-dev";arm.api="native-dev";arm.arch="arm64-v8a";arm.state="ready";arm.backend="host-dev";arm.stability="fundamental";arm.tags=deriveTags(arm);arm.healthScore=calculateHealthScore(arm);m_targets.push_back(arm);
+        for(const auto &entry:d.entryList(QStringList()<<"*.ini",QDir::Files)){AndroidTarget t;t.id=entry.left(entry.size()-4);t.api="unknown";t.arch=m_x86_64Host?"x86_64":"arm64-v8a";t.state="stopped";t.backend="avd";t.stability=classifyTargetStability(t.arch);m_targets.push_back(t);}
+    }
+    if(m_targets.isEmpty()){
+        AndroidTarget x86;x86.id="x86_64-dev";x86.api="native-dev";x86.arch="x86_64";x86.state="ready";x86.backend="host-dev";x86.stability="preferred";m_targets.push_back(x86);
+        AndroidTarget arm;arm.id="arm64-dev";arm.api="native-dev";arm.arch="arm64-v8a";arm.state="ready";arm.backend="host-dev";arm.stability="fundamental";m_targets.push_back(arm);
     }
 }
 
@@ -90,6 +96,7 @@ bool AndroidRuntime::start(const QString &id){
     bool ok=m_androidEmulator?m_androidEmulator->start(id,true):false;
     if(!ok&&m_targets[i].backend=="host-dev"){m_targets[i].state="ready";emit logMessage("Host development target selected: "+id+" ("+m_targets[i].arch+")");ok=true;}
     if(ok){m_targets[i].state="running";m_targets[i].tags=deriveTags(m_targets[i]);m_targets[i].healthScore=calculateHealthScore(m_targets[i]);emit logMessage("Started Android target "+id+" ["+m_targets[i].arch+", "+m_targets[i].stability+"]");emit targetChanged(id);}return ok;
+    if(ok){m_targets[i].state="running";emit logMessage("Started Android target "+id+" ["+m_targets[i].arch+", "+m_targets[i].stability+"]");emit targetChanged(id);}return ok;
 }
 
 bool AndroidRuntime::stop(const QString &id){const int i=indexOf(id);if(i<0)return false;bool ok=m_androidEmulator?m_androidEmulator->stop(id):true;m_targets[i].state="stopped";m_targets[i].tags=deriveTags(m_targets[i]);m_targets[i].healthScore=calculateHealthScore(m_targets[i]);emit logMessage("Stopped target "+id);emit targetChanged(id);return ok;}
